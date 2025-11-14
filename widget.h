@@ -2,10 +2,12 @@
 #define WIDGET_H
 
 #include <QWidget>
-#include <SerialManager.h>
 #include <QSerialPort>
 #include <QThread>
 #include <QSerialPortInfo>// 串口信息类（用于获取端口列表等）
+#include <QTimer>// 定时器类（用于自动发送功能）
+#include <QRegularExpression>// 正则表达式类（用于HEX发送验证）
+#include "serialmanager.h"// 串口管理类
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -35,13 +37,12 @@ private:
 
     // 状态标志
     bool isOpened;                  // 串口是否打开
+    bool isPaused;                  // 是否暂停接收
 
     // 统计数据
     quint64 rxCount;                // 接收字节数
     quint64 txCount;                // 发送字节数
-
-    // 缓冲区
-    QByteArray rxBuffer;            // 接收缓冲区
+    QByteArray rxBuffer;            // 接收数据缓冲区
     QByteArray txBuffer;            // 发送缓冲区
 
     // 定时器
@@ -64,6 +65,8 @@ signals:
 private slots:
     // 处理串口工作线程发来的"收到数据"信号（在主线程执行，可安全更新UI）
     void onDataReceived(const QByteArray &data);
+    // 根据当前显示模式更新接收文本框内容
+    void updateDisplay();
     // 处理串口工作线程发来的"错误发生"信号
     void onErrorOccurred(const QString &error);
     // 处理串口工作线程发来的"串口打开结果"信号
@@ -76,5 +79,24 @@ private slots:
     void on_btnClose_clicked();
     // 刷新串口列表按钮
     void on_btnRefresh_clicked();
+    // 发送按钮点击事件
+    void on_btnSend_clicked();
+    // 清空接收按钮点击事件
+    void on_btnClearReceive_clicked();
+    // 暂停接收按钮点击事件
+    void on_btnPauseReceive_clicked();
+    // 自动发送复选框状态变化事件
+    void on_checkAutoSend_stateChanged(int arg1);
+    // HEX显示单选按钮状态变化事件
+    void on_radioHexReceive_toggled(bool checked);
+    // ASCII显示单选按钮状态变化事件
+    void on_radioAsciiReceive_toggled(bool checked);
+    // HEX发送单选按钮状态变化事件
+    void on_radioHexSend_toggled(bool checked);
+    // ASCII发送单选按钮状态变化事件
+    void on_radioAsciiSend_toggled(bool checked);
+    // 自动发送定时器超时事件
+    void autoSendTimerTimeout();
 };
+
 #endif // WIDGET_H

@@ -182,6 +182,7 @@ public:
 
         textEditSend = new QTextEdit(Widget);
         textEditSend->setObjectName("textEditSend");
+        textEditSend->setMaximumSize(QSize(300, 300));
 
         verticalLayout->addWidget(textEditSend);
 
@@ -209,6 +210,7 @@ public:
 
         spinBoxInterval = new QSpinBox(Widget);
         spinBoxInterval->setObjectName("spinBoxInterval");
+        spinBoxInterval->setMaximum(100000);
 
         gridLayout_2->addWidget(spinBoxInterval, 1, 2, 1, 1);
 
@@ -228,9 +230,9 @@ public:
 
         verticalLayout->addLayout(gridLayout_2);
 
-        verticalLayout->setStretch(0, 1);
+        verticalLayout->setStretch(0, 2);
         verticalLayout->setStretch(1, 1);
-        verticalLayout->setStretch(2, 1);
+        verticalLayout->setStretch(2, 2);
 
         horizontalLayout->addLayout(verticalLayout);
 

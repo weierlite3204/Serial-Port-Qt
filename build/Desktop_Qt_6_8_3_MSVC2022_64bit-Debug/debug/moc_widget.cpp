@@ -55,6 +55,7 @@ static constexpr auto qt_meta_stringdata_ZN6WidgetE = QtMocHelpers::stringData(
     "data",
     "initcombo",
     "onDataReceived",
+    "updateDisplay",
     "onErrorOccurred",
     "error",
     "onPortOpened",
@@ -64,7 +65,18 @@ static constexpr auto qt_meta_stringdata_ZN6WidgetE = QtMocHelpers::stringData(
     "ports",
     "on_btnOpen_clicked",
     "on_btnClose_clicked",
-    "on_btnRefresh_clicked"
+    "on_btnRefresh_clicked",
+    "on_btnSend_clicked",
+    "on_btnClearReceive_clicked",
+    "on_btnPauseReceive_clicked",
+    "on_checkAutoSend_stateChanged",
+    "arg1",
+    "on_radioHexReceive_toggled",
+    "checked",
+    "on_radioAsciiReceive_toggled",
+    "on_radioHexSend_toggled",
+    "on_radioAsciiSend_toggled",
+    "autoSendTimerTimeout"
 );
 #else  // !QT_MOC_HAS_STRINGDATA
 #error "qtmochelpers.h not found or too old."
@@ -76,7 +88,7 @@ Q_CONSTINIT static const uint qt_meta_data_ZN6WidgetE[] = {
       12,       // revision
        0,       // classname
        0,    0, // classinfo
-      11,   14, // methods
+      21,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -84,19 +96,29 @@ Q_CONSTINIT static const uint qt_meta_data_ZN6WidgetE[] = {
        4,       // signalCount
 
  // signals: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    5,   80,    2, 0x06,    1 /* Public */,
-      12,    0,   91,    2, 0x06,    7 /* Public */,
-      13,    1,   92,    2, 0x06,    8 /* Public */,
-      15,    0,   95,    2, 0x06,   10 /* Public */,
+       1,    5,  140,    2, 0x06,    1 /* Public */,
+      12,    0,  151,    2, 0x06,    7 /* Public */,
+      13,    1,  152,    2, 0x06,    8 /* Public */,
+      15,    0,  155,    2, 0x06,   10 /* Public */,
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-      16,    1,   96,    2, 0x08,   11 /* Private */,
-      17,    1,   99,    2, 0x08,   13 /* Private */,
-      19,    1,  102,    2, 0x08,   15 /* Private */,
-      21,    1,  105,    2, 0x08,   17 /* Private */,
-      24,    0,  108,    2, 0x08,   19 /* Private */,
-      25,    0,  109,    2, 0x08,   20 /* Private */,
-      26,    0,  110,    2, 0x08,   21 /* Private */,
+      16,    1,  156,    2, 0x08,   11 /* Private */,
+      17,    0,  159,    2, 0x08,   13 /* Private */,
+      18,    1,  160,    2, 0x08,   14 /* Private */,
+      20,    1,  163,    2, 0x08,   16 /* Private */,
+      22,    1,  166,    2, 0x08,   18 /* Private */,
+      25,    0,  169,    2, 0x08,   20 /* Private */,
+      26,    0,  170,    2, 0x08,   21 /* Private */,
+      27,    0,  171,    2, 0x08,   22 /* Private */,
+      28,    0,  172,    2, 0x08,   23 /* Private */,
+      29,    0,  173,    2, 0x08,   24 /* Private */,
+      30,    0,  174,    2, 0x08,   25 /* Private */,
+      31,    1,  175,    2, 0x08,   26 /* Private */,
+      33,    1,  178,    2, 0x08,   28 /* Private */,
+      35,    1,  181,    2, 0x08,   30 /* Private */,
+      36,    1,  184,    2, 0x08,   32 /* Private */,
+      37,    1,  187,    2, 0x08,   34 /* Private */,
+      38,    0,  190,    2, 0x08,   36 /* Private */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::QString, 0x80000000 | 4, 0x80000000 | 6, 0x80000000 | 8, 0x80000000 | 10,    3,    5,    7,    9,   11,
@@ -106,11 +128,21 @@ Q_CONSTINIT static const uint qt_meta_data_ZN6WidgetE[] = {
 
  // slots: parameters
     QMetaType::Void, QMetaType::QByteArray,   14,
-    QMetaType::Void, QMetaType::QString,   18,
-    QMetaType::Void, QMetaType::Bool,   20,
-    QMetaType::Void, 0x80000000 | 22,   23,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::QString,   19,
+    QMetaType::Void, QMetaType::Bool,   21,
+    QMetaType::Void, 0x80000000 | 23,   24,
     QMetaType::Void,
     QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,   32,
+    QMetaType::Void, QMetaType::Bool,   34,
+    QMetaType::Void, QMetaType::Bool,   34,
+    QMetaType::Void, QMetaType::Bool,   34,
+    QMetaType::Void, QMetaType::Bool,   34,
     QMetaType::Void,
 
        0        // eod
@@ -142,6 +174,8 @@ Q_CONSTINIT const QMetaObject Widget::staticMetaObject = { {
         // method 'onDataReceived'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         QtPrivate::TypeAndForceComplete<const QByteArray &, std::false_type>,
+        // method 'updateDisplay'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'onErrorOccurred'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         QtPrivate::TypeAndForceComplete<const QString &, std::false_type>,
@@ -156,6 +190,29 @@ Q_CONSTINIT const QMetaObject Widget::staticMetaObject = { {
         // method 'on_btnClose_clicked'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'on_btnRefresh_clicked'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'on_btnSend_clicked'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'on_btnClearReceive_clicked'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'on_btnPauseReceive_clicked'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'on_checkAutoSend_stateChanged'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<int, std::false_type>,
+        // method 'on_radioHexReceive_toggled'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<bool, std::false_type>,
+        // method 'on_radioAsciiReceive_toggled'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<bool, std::false_type>,
+        // method 'on_radioHexSend_toggled'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<bool, std::false_type>,
+        // method 'on_radioAsciiSend_toggled'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<bool, std::false_type>,
+        // method 'autoSendTimerTimeout'
         QtPrivate::TypeAndForceComplete<void, std::false_type>
     >,
     nullptr
@@ -171,12 +228,22 @@ void Widget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
         case 2: _t->writeDataRequested((*reinterpret_cast< std::add_pointer_t<QByteArray>>(_a[1]))); break;
         case 3: _t->initcombo(); break;
         case 4: _t->onDataReceived((*reinterpret_cast< std::add_pointer_t<QByteArray>>(_a[1]))); break;
-        case 5: _t->onErrorOccurred((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
-        case 6: _t->onPortOpened((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
-        case 7: _t->onPortRefresh((*reinterpret_cast< std::add_pointer_t<QList<QSerialPortInfo>>>(_a[1]))); break;
-        case 8: _t->on_btnOpen_clicked(); break;
-        case 9: _t->on_btnClose_clicked(); break;
-        case 10: _t->on_btnRefresh_clicked(); break;
+        case 5: _t->updateDisplay(); break;
+        case 6: _t->onErrorOccurred((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
+        case 7: _t->onPortOpened((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 8: _t->onPortRefresh((*reinterpret_cast< std::add_pointer_t<QList<QSerialPortInfo>>>(_a[1]))); break;
+        case 9: _t->on_btnOpen_clicked(); break;
+        case 10: _t->on_btnClose_clicked(); break;
+        case 11: _t->on_btnRefresh_clicked(); break;
+        case 12: _t->on_btnSend_clicked(); break;
+        case 13: _t->on_btnClearReceive_clicked(); break;
+        case 14: _t->on_btnPauseReceive_clicked(); break;
+        case 15: _t->on_checkAutoSend_stateChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 16: _t->on_radioHexReceive_toggled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 17: _t->on_radioAsciiReceive_toggled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 18: _t->on_radioHexSend_toggled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 19: _t->on_radioAsciiSend_toggled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 20: _t->autoSendTimerTimeout(); break;
         default: ;
         }
     }
@@ -232,14 +299,14 @@ int Widget::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 11)
+        if (_id < 21)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 11;
+        _id -= 21;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 11)
+        if (_id < 21)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 11;
+        _id -= 21;
     }
     return _id;
 }

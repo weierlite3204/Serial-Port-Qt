@@ -1,5 +1,10 @@
 ﻿#include "widget.h"
 #include "ui_widget.h"
+#include "serialmanager.h"
+#include <QSerialPortInfo>
+#include <QDateTime>
+#include <QTimer>
+#include <QRegularExpression>
 #include <QMessageBox>
 
 Widget::Widget(QWidget *parent)
@@ -7,9 +12,32 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
     , m_workerThread(nullptr)
     , m_serialmanager(nullptr)
+    , isOpened(false)
+    , isPaused(false)
+    , rxCount(0)
+    , txCount(0)
 {
     ui->setupUi(this);
+    
+    // 初始化自动发送定时器并设置对象名，确保connectSlotsByName能找到
+    autoSendTimer = new QTimer(this);
 
+    // 连接定时器超时信号与槽函数
+    connect(autoSendTimer, &QTimer::timeout, this, &Widget::autoSendTimerTimeout);
+    
+    // 默认选择ASCII发送和ASCII显示
+    ui->radioAsciiSend->setChecked(true);
+    ui->radioAsciiReceive->setChecked(true);
+    
+    // 初始化自动发送间隔为1000ms
+    ui->spinBoxInterval->setValue(1000);
+    
+    // 初始化状态指示
+    ui->labelStatus->setText("未连接");
+    ui->labelRxCount->setText("接收：0");
+    ui->labelTxCount->setText("发送：0");
+    ui->textEditReceive->setReadOnly(true);// 接收文本只读
+    
     setupSerialThread();// 初始化串口线程：创建线程、工作对象，连接信号槽
 
     emit initcombo();// 请求刷新串口列表
@@ -68,7 +96,67 @@ void Widget::setupSerialThread()
 // 处理串口工作线程发来的"收到数据"信号（在主线程执行，可安全更新UI）
 void Widget::onDataReceived(const QByteArray &data)
 {
+    // 如果暂停接收，则直接返回
+    if (isPaused) {
+        return;
+    }
 
+    // 将数据添加到接收缓冲区
+    rxBuffer.append(data);
+
+    // 更新接收计数
+    rxCount += data.size();
+    ui->labelRxCount->setText(QString("接收：%1").arg(rxCount));
+
+    // 显示接收到的数据
+    updateDisplay();
+}
+
+// 根据当前显示模式更新接收文本框的内容
+void Widget::updateDisplay()
+{
+    // 清空接收文本框
+    ui->textEditReceive->clear();
+    
+    // 根据当前显示模式转换并显示整个缓冲区的数据
+    QString displayText;
+    
+    // 检查是否需要显示时间戳
+    bool showTimestamp = ui->checkTimestamp->isChecked();
+    bool autoLine = ui->checkAutoLine->isChecked();
+    bool hexMode = ui->radioHexReceive->isChecked();
+    
+    if (hexMode) {
+        // HEX显示模式
+        if (showTimestamp) {
+            QDateTime currentTime = QDateTime::currentDateTime();
+            displayText = currentTime.toString("yyyy-MM-dd HH:mm:ss.zzz") + " ";
+        }
+        
+        QByteArray hexData = rxBuffer.toHex(' ');
+        displayText += hexData.toUpper();//将小写字母转换成大写字母，并添加到displayText中
+    } else {
+        // ASCII显示模式
+        if (showTimestamp) {
+            QDateTime currentTime = QDateTime::currentDateTime();
+            displayText = currentTime.toString("yyyy-MM-dd HH:mm:ss.zzz") + " ";
+        }
+        
+        displayText += QString(rxBuffer);
+    }
+    
+    // 如果需要自动换行，添加换行符
+    if (autoLine && !displayText.isEmpty()) {
+        displayText += "\n";
+    }
+    
+    // 设置文本内容
+    ui->textEditReceive->setPlainText(displayText);
+    
+    // 自动滚动到文本框底部
+    QTextCursor cursor = ui->textEditReceive->textCursor();
+    cursor.movePosition(QTextCursor::End);
+    ui->textEditReceive->setTextCursor(cursor);
 }
 
 // 处理串口工作线程发来的"错误发生"信号
@@ -80,14 +168,24 @@ void Widget::onErrorOccurred(const QString &error)
 // 处理串口工作线程发来的"串口打开结果"信号
 void Widget::onPortOpened(bool success)
 {
+    isOpened = success;
+    
     if(success == false)
     {
         ui->btnClose->setEnabled(false);
         ui->btnOpen->setEnabled(true);
-        return;
+        ui->labelStatus->setText("未连接");
+        // 停止自动发送计时器
+        autoSendTimer->stop();
+        // 取消自动发送复选框的选中状态
+        ui->checkAutoSend->setChecked(false);
     }
-    ui->btnOpen->setEnabled(false);
-    ui->btnClose->setEnabled(true);
+    else
+    {
+        ui->btnOpen->setEnabled(false);
+        ui->btnClose->setEnabled(true);
+        ui->labelStatus->setText("已连接");
+    }
 }
 
 // 处理串口工作线程发来的串口列表信息
@@ -182,6 +280,149 @@ void Widget::on_btnClose_clicked()
 {
     ui->btnClose->setEnabled(false);
     emit closePortRequested();//发送关闭串口信号
+}
+
+// 发送按钮点击事件
+void Widget::on_btnSend_clicked()
+{
+    // 如果串口未打开，则直接返回
+    if (!isOpened) {
+        QMessageBox::warning(this, "提示", "请先打开串口");
+        return;
+    }
+
+    QString sendText = ui->textEditSend->toPlainText();
+    if (sendText.isEmpty()) {
+        return;
+    }
+
+    QByteArray sendData;
+
+    // 根据发送模式转换数据
+    if (ui->radioHexSend->isChecked()) {
+        // HEX发送模式
+        // 移除所有非十六进制字符
+        sendText = sendText.remove(QRegularExpression("[^0-9A-Fa-f]"));
+        
+        // 确保字符数为偶数
+        if (sendText.length() % 2 != 0) {
+            QMessageBox::warning(this, "提示", "HEX发送数据必须是偶数个字符");
+            return;
+        }
+        
+        // 转换为字节数组
+        for (int i = 0; i < sendText.length(); i += 2) {
+            QString byteStr = sendText.mid(i, 2);
+            bool ok;
+            char byte = byteStr.toUInt(&ok, 16);
+            if (!ok) {
+                QMessageBox::warning(this, "提示", "HEX发送数据包含无效字符");
+                return;
+            }
+            sendData.append(byte);
+        }
+    } else {
+        // ASCII发送模式
+        sendData = sendText.toUtf8();
+    }
+
+    // 如果需要发送新行
+    if (ui->checkSendNewLine->isChecked()) {
+        sendData.append("\r\n");
+    }
+
+    // 发送数据
+    emit writeDataRequested(sendData);
+
+    // 更新发送计数
+    txCount += sendData.size();
+    ui->labelTxCount->setText(QString("发送：%1").arg(txCount));
+}
+
+// 清空接收按钮点击事件
+void Widget::on_btnClearReceive_clicked()
+{
+    // 清空接收缓冲区
+    rxBuffer.clear();
+    // 清空接收文本框
+    ui->textEditReceive->clear();
+    // 重置接收计数
+    rxCount = 0;
+    ui->labelRxCount->setText(QString("接收：%1").arg(rxCount));
+}
+
+// 暂停接收按钮点击事件
+void Widget::on_btnPauseReceive_clicked()
+{
+    isPaused = !isPaused;
+    if (isPaused) {
+        ui->btnPauseReceive->setText("继续接收");
+    } else {
+        ui->btnPauseReceive->setText("暂停接收");
+    }
+}
+
+// 自动发送复选框状态变化事件
+void Widget::on_checkAutoSend_stateChanged(int arg1)
+{
+    if (arg1 == Qt::Checked) {
+        // 检查串口是否已经打开
+        if (!isOpened) {
+            QMessageBox::warning(this, "提示", "请先打开串口");
+            // 取消自动发送复选框的选中状态
+            ui->checkAutoSend->setChecked(false);
+            return;
+        }
+        // 启用自动发送
+        int interval = ui->spinBoxInterval->value();
+        autoSendTimer->start(interval);
+    } else {
+        // 禁用自动发送
+        autoSendTimer->stop();
+    }
+}
+
+// HEX显示单选按钮状态变化事件
+void Widget::on_radioHexReceive_toggled(bool checked)
+{
+    if (checked) {
+        // HEX显示模式被选中，重新显示缓冲区数据
+        updateDisplay();
+    }
+}
+
+// ASCII显示单选按钮状态变化事件
+void Widget::on_radioAsciiReceive_toggled(bool checked)
+{
+    if (checked) {
+        // ASCII显示模式被选中，重新显示缓冲区数据
+        updateDisplay();
+    }
+}
+
+// HEX发送单选按钮状态变化事件
+void Widget::on_radioHexSend_toggled(bool checked)
+{
+    if (checked) {
+        // HEX发送模式被选中
+        // 可以在这里添加模式切换的额外逻辑
+    }
+}
+
+// ASCII发送单选按钮状态变化事件
+void Widget::on_radioAsciiSend_toggled(bool checked)
+{
+    if (checked) {
+        // ASCII发送模式被选中
+        // 可以在这里添加模式切换的额外逻辑
+    }
+}
+
+// 自动发送定时器超时事件
+void Widget::autoSendTimerTimeout()
+{
+    // 自动发送时调用发送按钮的处理函数
+    on_btnSend_clicked();
 }
 
 // 刷新串口列表按钮
