@@ -5,6 +5,7 @@
 #include <QDateTime>
 #include <QTimer>
 #include <QRegularExpression>
+#include <QFileDialog>
 #include <QMessageBox>
 
 Widget::Widget(QWidget *parent)
@@ -37,6 +38,9 @@ Widget::Widget(QWidget *parent)
     ui->labelRxCount->setText("接收：0");
     ui->labelTxCount->setText("发送：0");
     ui->textEditReceive->setReadOnly(true);// 接收文本只读
+    
+    // 设置自动换行属性，让文本根据控件宽度自动换行
+    ui->textEditReceive->setLineWrapMode(QTextEdit::WidgetWidth);
     
     setupSerialThread();// 初始化串口线程：创建线程、工作对象，连接信号槽
 
@@ -108,6 +112,13 @@ void Widget::onDataReceived(const QByteArray &data)
     rxCount += data.size();
     ui->labelRxCount->setText(QString("接收：%1").arg(rxCount));
 
+    // 保存到消息历史记录
+    Message msg;
+    msg.data = data;
+    msg.isReceived = true;
+    msg.timestamp = QDateTime::currentDateTime();
+    messageHistory.append(msg);
+
     // 显示接收到的数据
     updateDisplay();
 }
@@ -118,40 +129,48 @@ void Widget::updateDisplay()
     // 清空接收文本框
     ui->textEditReceive->clear();
     
-    // 根据当前显示模式转换并显示整个缓冲区的数据
-    QString displayText;
-    
     // 检查是否需要显示时间戳
     bool showTimestamp = ui->checkTimestamp->isChecked();
-    bool autoLine = ui->checkAutoLine->isChecked();
+    bool autoLine = ui->checkAutoLine->isChecked();//自动换行
     bool hexMode = ui->radioHexReceive->isChecked();
     
-    if (hexMode) {
-        // HEX显示模式
-        if (showTimestamp) {
-            QDateTime currentTime = QDateTime::currentDateTime();
-            displayText = currentTime.toString("yyyy-MM-dd HH:mm:ss.zzz") + " ";
-        }
-        
-        QByteArray hexData = rxBuffer.toHex(' ');
-        displayText += hexData.toUpper();//将小写字母转换成大写字母，并添加到displayText中
-    } else {
-        // ASCII显示模式
-        if (showTimestamp) {
-            QDateTime currentTime = QDateTime::currentDateTime();
-            displayText = currentTime.toString("yyyy-MM-dd HH:mm:ss.zzz") + " ";
-        }
-        
-        displayText += QString(rxBuffer);
-    }
+    QString displayText;
     
-    // 如果需要自动换行，添加换行符
-    if (autoLine && !displayText.isEmpty()) {
-        displayText += "\n";
+    // 遍历消息历史记录
+    for (const Message &msg : messageHistory) {
+        QString line;
+        
+        if (showTimestamp) {
+            line += msg.timestamp.toString("yyyy-MM-dd HH:mm:ss") + " ";
+        }
+        
+        if (hexMode) {
+            // HEX显示模式
+            QByteArray hexData = msg.data.toHex(' ');
+            line += hexData.toUpper();
+        } else {
+            // ASCII显示模式
+            QString asciiText = QString(msg.data);
+            // 将ASCII数据中的换行符转换为HTML换行标签
+            asciiText.replace("\n", "<br>");
+            line += asciiText;
+        }
+        
+        // 如果需要自动换行，添加换行符
+        if (autoLine && !line.isEmpty()) {
+            line += "<br>";
+        }
+        
+        // 设置颜色
+        if (msg.isReceived) {
+            displayText += QString("<span style='color: red;'>%1</span>").arg(line);
+        } else {
+            displayText += QString("<span style='color: blue;'>%1</span>").arg(line);
+        }
     }
     
     // 设置文本内容
-    ui->textEditReceive->setPlainText(displayText);
+    ui->textEditReceive->setHtml(displayText);
     
     // 自动滚动到文本框底部
     QTextCursor cursor = ui->textEditReceive->textCursor();
@@ -334,6 +353,16 @@ void Widget::on_btnSend_clicked()
     // 发送数据
     emit writeDataRequested(sendData);
 
+    // 保存到消息历史记录
+    Message msg;
+    msg.data = sendData;
+    msg.isReceived = false;
+    msg.timestamp = QDateTime::currentDateTime();
+    messageHistory.append(msg);
+
+    // 更新显示
+    updateDisplay();
+
     // 更新发送计数
     txCount += sendData.size();
     ui->labelTxCount->setText(QString("发送：%1").arg(txCount));
@@ -344,6 +373,8 @@ void Widget::on_btnClearReceive_clicked()
 {
     // 清空接收缓冲区
     rxBuffer.clear();
+    // 清空消息历史记录
+    messageHistory.clear();
     // 清空接收文本框
     ui->textEditReceive->clear();
     // 重置接收计数
@@ -395,8 +426,63 @@ void Widget::on_radioHexReceive_toggled(bool checked)
 void Widget::on_radioAsciiReceive_toggled(bool checked)
 {
     if (checked) {
-        // ASCII显示模式被选中，重新显示缓冲区数据
+        // 更新显示
         updateDisplay();
+    }
+}
+
+// 保存数据按钮点击事件
+void Widget::on_btnSaveReceive_clicked()
+{
+    // 使用文件对话框让用户选择保存路径和文件名
+    QString filePath = QFileDialog::getSaveFileName(this, tr("保存数据"), "", tr("文本文件 (*.txt);;所有文件 (*.*)"));
+    if (filePath.isEmpty()) {
+        return;  // 用户取消了保存
+    }
+
+    // 检查是否需要显示时间戳
+    bool showTimestamp = ui->checkTimestamp->isChecked();
+    bool hexMode = ui->radioHexReceive->isChecked();
+
+    // 生成要保存的文本内容
+    QString content;
+    for (const Message &msg : messageHistory) {
+        QString line;
+
+        if (showTimestamp) {
+            line += msg.timestamp.toString("yyyy-MM-dd HH:mm:ss") + " ";
+        }
+
+        if (hexMode) {
+            // HEX显示模式
+            QByteArray hexData = msg.data.toHex(' ');
+            line += hexData.toUpper();
+        } else {
+            // ASCII显示模式
+            QString asciiText = QString(msg.data);
+            line += asciiText;
+        }
+
+        // 添加换行符
+        line += "\n";
+
+        // 设置颜色标识（使用不同的前缀）
+        if (msg.isReceived) {
+            content += line;  // 接收的数据直接保存
+        } else {
+            content += line;  // 发送的数据直接保存
+        }
+    }
+
+    // 将内容写入文件
+    QFile file(filePath);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        out << content;
+        file.close();
+        QMessageBox::information(this, tr("保存成功"), tr("数据已成功保存到文件！"));
+    } else {
+        QMessageBox::warning(this, tr("保存失败"), tr("无法打开文件进行写入：") + file.errorString());
     }
 }
 

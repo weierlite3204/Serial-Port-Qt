@@ -13,13 +13,16 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QComboBox>
+#include <QtWidgets/QFrame>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QRadioButton>
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QTabWidget>
+#include <QtWidgets/QTableWidget>
 #include <QtWidgets/QTextEdit>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
@@ -33,19 +36,22 @@ public:
     QVBoxLayout *verticalLayout;
     QGridLayout *gridLayout;
     QLabel *labelPort;
-    QComboBox *comboBoxPort;
-    QPushButton *btnRefresh;
-    QComboBox *comboBoxBaudRate;
-    QPushButton *btnOpen;
+    QPushButton *pushButton;
+    QComboBox *comboBoxStopBits;
     QLabel *labelDataBits;
+    QComboBox *comboBoxBaudRate;
+    QPushButton *btnRefresh;
+    QLabel *label;
+    QLabel *labelIndicator;
     QComboBox *comboBoxDataBits;
     QPushButton *btnClose;
     QLabel *labelStopBits;
-    QComboBox *comboBoxStopBits;
-    QLabel *labelParity;
-    QComboBox *comboBoxParity;
-    QLabel *labelIndicator;
+    QComboBox *comboBoxPort;
+    QPushButton *btnOpen;
     QLabel *labelBaudRate;
+    QLabel *labelParity;
+    QComboBox *comboBox;
+    QComboBox *comboBoxParity;
     QTextEdit *textEditSend;
     QGridLayout *gridLayout_2;
     QRadioButton *radioHexSend;
@@ -72,6 +78,8 @@ public:
     QLabel *labelRxCount;
     QLabel *labelTxCount;
     QWidget *tab_2;
+    QTableWidget *tableWidget;
+    QFrame *frame;
 
     void setupUi(QWidget *Widget)
     {
@@ -90,16 +98,23 @@ public:
 
         gridLayout->addWidget(labelPort, 0, 0, 1, 1);
 
-        comboBoxPort = new QComboBox(Widget);
-        comboBoxPort->setObjectName("comboBoxPort");
-        comboBoxPort->setMinimumSize(QSize(70, 0));
+        pushButton = new QPushButton(Widget);
+        pushButton->setObjectName("pushButton");
 
-        gridLayout->addWidget(comboBoxPort, 0, 1, 1, 1);
+        gridLayout->addWidget(pushButton, 8, 2, 1, 1);
 
-        btnRefresh = new QPushButton(Widget);
-        btnRefresh->setObjectName("btnRefresh");
+        comboBoxStopBits = new QComboBox(Widget);
+        comboBoxStopBits->addItem(QString());
+        comboBoxStopBits->addItem(QString());
+        comboBoxStopBits->setObjectName("comboBoxStopBits");
+        comboBoxStopBits->setMinimumSize(QSize(70, 0));
 
-        gridLayout->addWidget(btnRefresh, 0, 2, 1, 1);
+        gridLayout->addWidget(comboBoxStopBits, 4, 1, 1, 1);
+
+        labelDataBits = new QLabel(Widget);
+        labelDataBits->setObjectName("labelDataBits");
+
+        gridLayout->addWidget(labelDataBits, 2, 0, 1, 1);
 
         comboBoxBaudRate = new QComboBox(Widget);
         comboBoxBaudRate->addItem(QString());
@@ -112,15 +127,20 @@ public:
 
         gridLayout->addWidget(comboBoxBaudRate, 1, 1, 1, 1);
 
-        btnOpen = new QPushButton(Widget);
-        btnOpen->setObjectName("btnOpen");
+        btnRefresh = new QPushButton(Widget);
+        btnRefresh->setObjectName("btnRefresh");
 
-        gridLayout->addWidget(btnOpen, 1, 2, 1, 1);
+        gridLayout->addWidget(btnRefresh, 0, 2, 1, 1);
 
-        labelDataBits = new QLabel(Widget);
-        labelDataBits->setObjectName("labelDataBits");
+        label = new QLabel(Widget);
+        label->setObjectName("label");
 
-        gridLayout->addWidget(labelDataBits, 2, 0, 1, 1);
+        gridLayout->addWidget(label, 8, 0, 1, 1);
+
+        labelIndicator = new QLabel(Widget);
+        labelIndicator->setObjectName("labelIndicator");
+
+        gridLayout->addWidget(labelIndicator, 4, 2, 2, 1);
 
         comboBoxDataBits = new QComboBox(Widget);
         comboBoxDataBits->addItem(QString());
@@ -140,20 +160,34 @@ public:
         labelStopBits = new QLabel(Widget);
         labelStopBits->setObjectName("labelStopBits");
 
-        gridLayout->addWidget(labelStopBits, 3, 0, 1, 1);
+        gridLayout->addWidget(labelStopBits, 4, 0, 1, 1);
 
-        comboBoxStopBits = new QComboBox(Widget);
-        comboBoxStopBits->addItem(QString());
-        comboBoxStopBits->addItem(QString());
-        comboBoxStopBits->setObjectName("comboBoxStopBits");
-        comboBoxStopBits->setMinimumSize(QSize(70, 0));
+        comboBoxPort = new QComboBox(Widget);
+        comboBoxPort->setObjectName("comboBoxPort");
+        comboBoxPort->setMinimumSize(QSize(70, 0));
 
-        gridLayout->addWidget(comboBoxStopBits, 3, 1, 1, 1);
+        gridLayout->addWidget(comboBoxPort, 0, 1, 1, 1);
+
+        btnOpen = new QPushButton(Widget);
+        btnOpen->setObjectName("btnOpen");
+
+        gridLayout->addWidget(btnOpen, 1, 2, 1, 1);
+
+        labelBaudRate = new QLabel(Widget);
+        labelBaudRate->setObjectName("labelBaudRate");
+
+        gridLayout->addWidget(labelBaudRate, 1, 0, 1, 1);
 
         labelParity = new QLabel(Widget);
         labelParity->setObjectName("labelParity");
 
-        gridLayout->addWidget(labelParity, 4, 0, 1, 1);
+        gridLayout->addWidget(labelParity, 5, 0, 1, 1);
+
+        comboBox = new QComboBox(Widget);
+        comboBox->addItem(QString());
+        comboBox->setObjectName("comboBox");
+
+        gridLayout->addWidget(comboBox, 8, 1, 1, 1);
 
         comboBoxParity = new QComboBox(Widget);
         comboBoxParity->addItem(QString());
@@ -162,21 +196,9 @@ public:
         comboBoxParity->setObjectName("comboBoxParity");
         comboBoxParity->setMinimumSize(QSize(70, 0));
 
-        gridLayout->addWidget(comboBoxParity, 4, 1, 1, 1);
-
-        labelIndicator = new QLabel(Widget);
-        labelIndicator->setObjectName("labelIndicator");
-
-        gridLayout->addWidget(labelIndicator, 3, 2, 2, 1);
-
-        labelBaudRate = new QLabel(Widget);
-        labelBaudRate->setObjectName("labelBaudRate");
-
-        gridLayout->addWidget(labelBaudRate, 1, 0, 1, 1);
+        gridLayout->addWidget(comboBoxParity, 5, 1, 1, 1);
 
         gridLayout->setColumnStretch(0, 1);
-        gridLayout->setColumnStretch(1, 2);
-        gridLayout->setColumnStretch(2, 1);
 
         verticalLayout->addLayout(gridLayout);
 
@@ -310,6 +332,14 @@ public:
         tabWidget->addTab(tab, QString());
         tab_2 = new QWidget();
         tab_2->setObjectName("tab_2");
+        tableWidget = new QTableWidget(tab_2);
+        tableWidget->setObjectName("tableWidget");
+        tableWidget->setGeometry(QRect(10, 10, 281, 281));
+        frame = new QFrame(tab_2);
+        frame->setObjectName("frame");
+        frame->setGeometry(QRect(10, 300, 751, 311));
+        frame->setFrameShape(QFrame::Shape::StyledPanel);
+        frame->setFrameShadow(QFrame::Shadow::Raised);
         tabWidget->addTab(tab_2, QString());
 
         horizontalLayout->addWidget(tabWidget);
@@ -319,6 +349,9 @@ public:
 
         retranslateUi(Widget);
 
+        tabWidget->setCurrentIndex(1);
+
+
         QMetaObject::connectSlotsByName(Widget);
     } // setupUi
 
@@ -326,15 +359,20 @@ public:
     {
         Widget->setWindowTitle(QCoreApplication::translate("Widget", "Widget", nullptr));
         labelPort->setText(QCoreApplication::translate("Widget", "\344\270\262\345\217\243\357\274\232", nullptr));
-        btnRefresh->setText(QCoreApplication::translate("Widget", "\345\210\267\346\226\260\344\270\262\345\217\243", nullptr));
+        pushButton->setText(QCoreApplication::translate("Widget", "\351\207\207\351\233\206\346\270\251\345\272\246\345\222\214\346\271\277\345\272\246", nullptr));
+        comboBoxStopBits->setItemText(0, QCoreApplication::translate("Widget", "1", nullptr));
+        comboBoxStopBits->setItemText(1, QCoreApplication::translate("Widget", "2", nullptr));
+
+        labelDataBits->setText(QCoreApplication::translate("Widget", "\346\225\260\346\215\256\344\275\215\357\274\232", nullptr));
         comboBoxBaudRate->setItemText(0, QCoreApplication::translate("Widget", "4800", nullptr));
         comboBoxBaudRate->setItemText(1, QCoreApplication::translate("Widget", "9600", nullptr));
         comboBoxBaudRate->setItemText(2, QCoreApplication::translate("Widget", "19200", nullptr));
         comboBoxBaudRate->setItemText(3, QCoreApplication::translate("Widget", "38400", nullptr));
         comboBoxBaudRate->setItemText(4, QCoreApplication::translate("Widget", "57600", nullptr));
 
-        btnOpen->setText(QCoreApplication::translate("Widget", "\346\211\223\345\274\200\344\270\262\345\217\243", nullptr));
-        labelDataBits->setText(QCoreApplication::translate("Widget", "\346\225\260\346\215\256\344\275\215\357\274\232", nullptr));
+        btnRefresh->setText(QCoreApplication::translate("Widget", "\345\210\267\346\226\260\344\270\262\345\217\243", nullptr));
+        label->setText(QCoreApplication::translate("Widget", "\345\215\217\350\256\256\357\274\232", nullptr));
+        labelIndicator->setText(QString());
         comboBoxDataBits->setItemText(0, QCoreApplication::translate("Widget", "8", nullptr));
         comboBoxDataBits->setItemText(1, QCoreApplication::translate("Widget", "7", nullptr));
         comboBoxDataBits->setItemText(2, QCoreApplication::translate("Widget", "6", nullptr));
@@ -342,16 +380,15 @@ public:
 
         btnClose->setText(QCoreApplication::translate("Widget", "\345\205\263\351\227\255\344\270\262\345\217\243", nullptr));
         labelStopBits->setText(QCoreApplication::translate("Widget", "\345\201\234\346\255\242\344\275\215\357\274\232", nullptr));
-        comboBoxStopBits->setItemText(0, QCoreApplication::translate("Widget", "1", nullptr));
-        comboBoxStopBits->setItemText(1, QCoreApplication::translate("Widget", "2", nullptr));
-
+        btnOpen->setText(QCoreApplication::translate("Widget", "\346\211\223\345\274\200\344\270\262\345\217\243", nullptr));
+        labelBaudRate->setText(QCoreApplication::translate("Widget", "\346\263\242\347\211\271\347\216\207\357\274\232", nullptr));
         labelParity->setText(QCoreApplication::translate("Widget", "\346\240\241\351\252\214\344\275\215\357\274\232", nullptr));
+        comboBox->setItemText(0, QCoreApplication::translate("Widget", "Modbus RTU", nullptr));
+
         comboBoxParity->setItemText(0, QCoreApplication::translate("Widget", "\346\227\240", nullptr));
         comboBoxParity->setItemText(1, QCoreApplication::translate("Widget", "\345\245\207", nullptr));
         comboBoxParity->setItemText(2, QCoreApplication::translate("Widget", "\345\201\266", nullptr));
 
-        labelIndicator->setText(QString());
-        labelBaudRate->setText(QCoreApplication::translate("Widget", "\346\263\242\347\211\271\347\216\207\357\274\232", nullptr));
         radioHexSend->setText(QCoreApplication::translate("Widget", "HEX\345\217\221\351\200\201", nullptr));
         radioAsciiSend->setText(QCoreApplication::translate("Widget", "ASCII\345\217\221\351\200\201", nullptr));
         checkAutoSend->setText(QCoreApplication::translate("Widget", "\350\207\252\345\212\250\345\217\221\351\200\201", nullptr));

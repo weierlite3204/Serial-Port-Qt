@@ -29,7 +29,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout" stretch="2,1,2">
      <item>
-      <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0" columnstretch="1,2,1">
+      <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0,0,0,0,0" columnstretch="1,0,0">
        <item row="0" column="0">
         <widget class="QLabel" name="labelPort">
          <property name="text">
@@ -37,20 +37,37 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QComboBox" name="comboBoxPort">
+       <item row="8" column="2">
+        <widget class="QPushButton" name="pushButton">
+         <property name="text">
+          <string>采集温度和湿度</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QComboBox" name="comboBoxStopBits">
          <property name="minimumSize">
           <size>
            <width>70</width>
            <height>0</height>
           </size>
          </property>
+         <item>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </item>
         </widget>
        </item>
-       <item row="0" column="2">
-        <widget class="QPushButton" name="btnRefresh">
+       <item row="2" column="0">
+        <widget class="QLabel" name="labelDataBits">
          <property name="text">
-          <string>刷新串口</string>
+          <string>数据位：</string>
          </property>
         </widget>
        </item>
@@ -89,17 +106,24 @@
          </item>
         </widget>
        </item>
-       <item row="1" column="2">
-        <widget class="QPushButton" name="btnOpen">
+       <item row="0" column="2">
+        <widget class="QPushButton" name="btnRefresh">
          <property name="text">
-          <string>打开串口</string>
+          <string>刷新串口</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="labelDataBits">
+       <item row="8" column="0">
+        <widget class="QLabel" name="label">
          <property name="text">
-          <string>数据位：</string>
+          <string>协议：</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2" rowspan="2">
+        <widget class="QLabel" name="labelIndicator">
+         <property name="text">
+          <string/>
          </property>
         </widget>
        </item>
@@ -140,41 +164,54 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item row="4" column="0">
         <widget class="QLabel" name="labelStopBits">
          <property name="text">
           <string>停止位：</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
-        <widget class="QComboBox" name="comboBoxStopBits">
+       <item row="0" column="1">
+        <widget class="QComboBox" name="comboBoxPort">
          <property name="minimumSize">
           <size>
            <width>70</width>
            <height>0</height>
           </size>
          </property>
-         <item>
-          <property name="text">
-           <string>1</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>2</string>
-          </property>
-         </item>
         </widget>
        </item>
-       <item row="4" column="0">
+       <item row="1" column="2">
+        <widget class="QPushButton" name="btnOpen">
+         <property name="text">
+          <string>打开串口</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="labelBaudRate">
+         <property name="text">
+          <string>波特率：</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
         <widget class="QLabel" name="labelParity">
          <property name="text">
           <string>校验位：</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="1">
+       <item row="8" column="1">
+        <widget class="QComboBox" name="comboBox">
+         <item>
+          <property name="text">
+           <string>Modbus RTU</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="5" column="1">
         <widget class="QComboBox" name="comboBoxParity">
          <property name="minimumSize">
           <size>
@@ -197,20 +234,6 @@
            <string>偶</string>
           </property>
          </item>
-        </widget>
-       </item>
-       <item row="3" column="2" rowspan="2">
-        <widget class="QLabel" name="labelIndicator">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="labelBaudRate">
-         <property name="text">
-          <string>波特率：</string>
-         </property>
         </widget>
        </item>
       </layout>
@@ -282,6 +305,9 @@
    </item>
    <item>
     <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>1</number>
+     </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
        <string>Tab 1</string>
@@ -374,6 +400,32 @@
       <attribute name="title">
        <string>Tab 2</string>
       </attribute>
+      <widget class="QTableWidget" name="tableWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>281</width>
+         <height>281</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QFrame" name="frame">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>300</y>
+         <width>751</width>
+         <height>311</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Shape::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Shadow::Raised</enum>
+       </property>
+      </widget>
      </widget>
     </widget>
    </item>

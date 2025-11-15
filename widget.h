@@ -6,6 +6,7 @@
 #include <QThread>
 #include <QSerialPortInfo>// 串口信息类（用于获取端口列表等）
 #include <QTimer>// 定时器类（用于自动发送功能）
+#include <QDateTime>
 #include <QRegularExpression>// 正则表达式类（用于HEX发送验证）
 #include "serialmanager.h"// 串口管理类
 
@@ -44,6 +45,14 @@ private:
     quint64 txCount;                // 发送字节数
     QByteArray rxBuffer;            // 接收数据缓冲区
     QByteArray txBuffer;            // 发送缓冲区
+    
+    // 消息历史记录
+    struct Message {
+        QByteArray data;
+        bool isReceived;  // true表示接收，false表示发送
+        QDateTime timestamp;
+    };
+    QList<Message> messageHistory;
 
     // 定时器
     QTimer *autoSendTimer;          // 自动发送定时器
@@ -89,6 +98,8 @@ private slots:
     void on_checkAutoSend_stateChanged(int arg1);
     // HEX显示单选按钮状态变化事件
     void on_radioHexReceive_toggled(bool checked);
+    // 保存数据按钮点击事件
+    void on_btnSaveReceive_clicked();
     // ASCII显示单选按钮状态变化事件
     void on_radioAsciiReceive_toggled(bool checked);
     // HEX发送单选按钮状态变化事件
